@@ -1,0 +1,15 @@
+#! /bin/bash 
+kubectl scale --replicas=0 deploy -n gloo-mesh gloo-mesh-mgmt-server
+kubectl delete envoyfilter -n gloo-mesh-gateways --all
+kubectl apply -f ./test/
+
+cat << EOF
+run the following Query:
+
+query MyQuery {
+  getBlogs {
+    id
+    content
+  }
+}
+EOF
