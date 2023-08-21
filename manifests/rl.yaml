@@ -23,8 +23,6 @@ spec:
 apiVersion: trafficcontrol.policy.gloo.solo.io/v2
 kind: RateLimitClientConfig
 metadata:
-  labels:
-    workspace.solo.io/exported: "true"
   name: client
   namespace: gloo-mesh
 spec:
@@ -50,29 +48,3 @@ spec:
       cluster: gloo-gateway
       name: rate-limiter
       namespace: gloo-mesh
-
----
-apiVersion: trafficcontrol.policy.gloo.solo.io/v2
-kind: RateLimitPolicy
-metadata:
-  name: rl
-  namespace: gloo-mesh 
-spec:
-  applyToRoutes:
-  - route:
-      labels:
-        ratelimited: "true"
-  config:
-    ratelimitClientConfig:
-      cluster: gloo-gateway
-      name: client
-      namespace: gloo-mesh
-    ratelimitServerConfig:
-      cluster: gloo-gateway
-      name: server
-      namespace: gloo-mesh
-    serverSettings:
-      cluster: gloo-gateway
-      name: settings
-      namespace: gloo-mesh
-
