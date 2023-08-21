@@ -1,0 +1,78 @@
+apiVersion: admin.gloo.solo.io/v2
+kind: RateLimitServerConfig
+metadata:
+  name: server
+  namespace: gloo-mesh
+spec:
+  destinationServers:
+  - port:
+      name: grpc
+    ref:
+      cluster: gloo-gateway
+      namespace: gloo-mesh
+      name: rate-limiter
+  raw:
+    descriptors:
+    - key: generic_key
+      rateLimit:
+        requestsPerUnit: 10
+        unit: MINUTE
+      value: counter
+---
+
+apiVersion: trafficcontrol.policy.gloo.solo.io/v2
+kind: RateLimitClientConfig
+metadata:
+  labels:
+    workspace.solo.io/exported: "true"
+  name: client
+  namespace: gloo-mesh
+spec:
+  raw:
+    rateLimits:
+    - actions:
+      - genericKey:
+          descriptorValue: counter
+
+
+---
+
+apiVersion: admin.gloo.solo.io/v2
+kind: RateLimitServerSettings
+metadata:
+  name: settings
+  namespace: gloo-mesh
+spec:
+  destinationServer:
+    port:
+      name: grpc
+    ref:
+      cluster: gloo-gateway
+      name: rate-limiter
+      namespace: gloo-mesh
+
+---
+apiVersion: trafficcontrol.policy.gloo.solo.io/v2
+kind: RateLimitPolicy
+metadata:
+  name: rl
+  namespace: gloo-mesh 
+spec:
+  applyToRoutes:
+  - route:
+      labels:
+        ratelimited: "true"
+  config:
+    ratelimitClientConfig:
+      cluster: gloo-gateway
+      name: client
+      namespace: gloo-mesh
+    ratelimitServerConfig:
+      cluster: gloo-gateway
+      name: server
+      namespace: gloo-mesh
+    serverSettings:
+      cluster: gloo-gateway
+      name: settings
+      namespace: gloo-mesh
+
